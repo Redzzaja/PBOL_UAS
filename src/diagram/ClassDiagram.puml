@@ -1,0 +1,167 @@
+@startuml
+skinparam backgroundColor #FEFEFE
+skinparam handwritten false
+
+title Class Diagram - Smart Manufacturing Work Order Management System
+
+skinparam classAttributeIconSize 0
+skinparam class {
+    BackgroundColor #E8F5E9
+    BorderColor #2E7D32
+    ArrowColor #1976D2
+}
+
+skinparam enum {
+    BackgroundColor #FFF3E0
+    BorderColor #F57C00
+}
+
+enum MachineStatus {
+    AVAILABLE
+    BUSY
+    MAINTENANCE
+    OFFLINE
+}
+
+enum WorkOrderStatus {
+    PENDING
+    IN_PROGRESS
+    COMPLETED
+    CANCELLED
+    ON_HOLD
+}
+
+enum OperatorStatus {
+    AVAILABLE
+    BUSY
+    OFFLINE
+}
+
+class Machine {
+    - String machineId
+    - String name
+    - String type
+    - MachineStatus status
+    - double capacityPerHour
+    - String location
+    - LocalDateTime lastMaintenance
+    - LocalDateTime nextMaintenance
+    + Machine(String, String, String, double, String)
+    + getMachineId(): String
+    + getName(): String
+    + getStatus(): MachineStatus
+    + setStatus(MachineStatus): void
+    + isAvailable(): boolean
+    + performMaintenance(): void
+    + toString(): String
+}
+
+class Operator {
+    - String operatorId
+    - String name
+    - String skillLevel
+    - OperatorStatus status
+    - String shift
+    - List<String> certifications
+    - LocalDateTime loginTime
+    + Operator(String, String, String, String)
+    + getOperatorId(): String
+    + getName(): String
+    + getStatus(): OperatorStatus
+    + setStatus(OperatorStatus): void
+    + addCertification(String): void
+    + isAvailable(): boolean
+    + toString(): String
+}
+
+class WorkOrder {
+    - String workOrderId
+    - String productName
+    - int quantity
+    - int completedQuantity
+    - WorkOrderStatus status
+    - Machine assignedMachine
+    - Operator assignedOperator
+    - LocalDateTime createdAt
+    - LocalDateTime startedAt
+    - LocalDateTime completedAt
+    - int priority
+    - String notes
+    + WorkOrder(String, String, int, int)
+    + getWorkOrderId(): String
+    + getStatus(): WorkOrderStatus
+    + setStatus(WorkOrderStatus): void
+    + getAssignedMachine(): Machine
+    + setAssignedMachine(Machine): void
+    + getAssignedOperator(): Operator
+    + setAssignedOperator(Operator): void
+    + updateCompletedQuantity(int): void
+    + getProgressPercentage(): double
+    + toString(): String
+}
+
+class ProductionManager {
+    - static ProductionManager instance
+    - List<Machine> machines
+    - List<Operator> operators
+    - List<WorkOrder> workOrders
+    - Map<String, ProductionThread> activeThreads
+    - ReentrantLock machineLock
+    - ProductionManager()
+    + static synchronized getInstance(): ProductionManager
+    + addMachine(Machine): void
+    + addOperator(Operator): void
+    + createWorkOrder(String, String, int, int): WorkOrder
+    + assignWorkOrder(String, String, String): void
+    + startProduction(String): void
+    + getMachineStatus(): List<Machine>
+    + getOperatorStatus(): List<Operator>
+    + getWorkOrderStatus(): List<WorkOrder>
+    + cancelWorkOrder(String): void
+}
+
+class ProductionThread {
+    - WorkOrder workOrder
+    - int productionSpeed
+    - boolean isRunning
+    - Thread thread
+    + ProductionThread(WorkOrder, int)
+    + run(): void
+    + startProduction(): void
+    + stopProduction(): void
+    + isRunning(): boolean
+    + simulateProduction(): void
+}
+
+class MachineUnavailableException {
+    + MachineUnavailableException(String)
+    + MachineUnavailableException(String, Throwable)
+}
+
+class InvalidQuantityException {
+    + InvalidQuantityException(String)
+    + InvalidQuantityException(String, Throwable)
+}
+
+class DuplicateWorkOrderException {
+    + DuplicateWorkOrderException(String)
+    + DuplicateWorkOrderException(String, Throwable)
+}
+
+Machine "1" -- "0..*" WorkOrder : assigned to >
+Operator "1" -- "0..*" WorkOrder : assigned to >
+ProductionManager "1" -- "0..*" Machine : manages >
+ProductionManager "1" -- "0..*" Operator : manages >
+ProductionManager "1" -- "0..*" WorkOrder : manages >
+ProductionManager "1" -- "0..*" ProductionThread : controls >
+ProductionThread "1" -- "1" WorkOrder : executes >
+
+Machine ..> MachineStatus : uses >
+WorkOrder ..> WorkOrderStatus : uses >
+Operator ..> OperatorStatus : uses >
+
+MachineUnavailableException --|> Exception
+InvalidQuantityException --|> Exception
+DuplicateWorkOrderException --|> Exception
+
+@enduml

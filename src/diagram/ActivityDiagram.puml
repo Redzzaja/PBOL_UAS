@@ -1,0 +1,85 @@
+@startuml
+skinparam backgroundColor #FEFEFE
+skinparam handwritten false
+
+title Activity Diagram - Work Order Management Process
+
+skinparam activity {
+    BackgroundColor #E8F5E9
+    BorderColor #2E7D32
+    ArrowColor #1976D2
+}
+
+skinparam startColor #4CAF50
+skinparam endColor #F44336
+
+start
+
+:Login to System;
+
+if (Authentication Success?) then (yes)
+    :Display Dashboard;
+    
+    while (User Action?) is (not logout)
+        switch (User Menu)
+        case (Create Work Order)
+            :Input Product Details;
+            :Input Quantity;
+            :Input Priority;
+            
+            if (Valid Input?) then (yes)
+                :Create Work Order;
+                :Save to Database;
+                :Show Success Message;
+            else (no)
+                :Show Error Message;
+            endif
+            
+        case (Assign Work Order)
+            :Select Work Order;
+            :Select Available Machine;
+            :Select Available Operator;
+            
+            if (Resources Available?) then (yes)
+                :Assign Machine & Operator;
+                :Update Status to PENDING;
+                :Lock Resources;
+            else (no)
+                :Show Conflict Message;
+            endif
+            
+        case (Start Production)
+            :Select Assigned Work Order;
+            :Validate Resources;
+            
+            if (Ready?) then (yes)
+                :Create Production Thread;
+                :Start Thread Execution;
+                :Update Status to IN_PROGRESS;
+                :Monitor Production;
+            else (no)
+                :Show Not Ready Message;
+            endif
+            
+        case (Monitor Production)
+            :Fetch Active Work Orders;
+            :Display Real-time Status;
+            :Show Progress Bars;
+            
+        case (Generate Reports)
+            :Select Report Type;
+            :Fetch Production Data;
+            :Generate Report;
+            :Export/Save Report;
+        endswitch
+    endwhile (logout)
+    
+    :Logout;
+    stop
+    
+else (no)
+    :Show Login Error;
+    stop
+endif
+
+@enduml

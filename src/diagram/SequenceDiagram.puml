@@ -1,0 +1,95 @@
+@startuml
+skinparam backgroundColor #FEFEFE
+skinparam handwritten false
+
+title Sequence Diagram - Create and Execute Work Order
+
+skinparam participant {
+    BackgroundColor #E3F2FD
+    BorderColor #1976D2
+}
+
+skinparam sequenceArrowColor #1976D2
+
+actor "Production Manager" as Manager
+participant "ProductionManager" as PM
+participant "Machine" as Machine
+participant "Operator" as Operator
+participant "WorkOrder" as WO
+participant "ProductionThread" as PT
+
+title Sequence Diagram - Create and Execute Work Order
+
+Manager -> PM: createWorkOrder(product, qty, priority)
+activate PM
+PM -> PM: validateInput()
+PM -> WO: new WorkOrder(id, product, qty, priority)
+activate WO
+WO --> PM: workOrder
+PM -> PM: addWorkOrder(workOrder)
+deactivate WO
+PM --> Manager: workOrder
+
+deactivate PM
+
+Manager -> PM: assignWorkOrder(woId, machineId, operatorId)
+activate PM
+PM -> PM: findWorkOrder(woId)
+PM -> PM: findMachine(machineId)
+PM -> PM: findOperator(operatorId)
+PM -> Machine: isAvailable()
+activate Machine
+Machine --> PM: true
+deactivate Machine
+PM -> Operator: isAvailable()
+activate Operator
+Operator --> PM: true
+deactivate Operator
+PM -> WO: setAssignedMachine(machine)
+PM -> WO: setAssignedOperator(operator)
+PM -> Machine: setStatus(BUSY)
+PM -> Operator: setStatus(BUSY)
+PM -> WO: setStatus(PENDING)
+PM --> Manager: Assignment Success
+deactivate PM
+
+Manager -> PM: startProduction(woId)
+activate PM
+PM -> PM: findWorkOrder(woId)
+PM -> WO: setStatus(IN_PROGRESS)
+PM -> PT: new ProductionThread(workOrder, speed)
+activate PT
+PT -> PT: start()
+PT -> WO: getAssignedMachine()
+activate WO
+WO --> PT: machine
+PM -> PM: activeThreads.put(woId, thread)
+PT --> PM: thread started
+deactivate WO
+deactivate PT
+PM --> Manager: Production Started
+deactivate PM
+
+loop Production Simulation
+    PT -> PT: simulateProduction()
+    activate PT
+    PT -> WO: updateCompletedQuantity(n)
+    PT -> WO: getProgressPercentage()
+    PT -> PT: Thread.sleep(speed)
+    deactivate PT
+end
+
+PT -> WO: setStatus(COMPLETED)
+activate WO
+WO -> Machine: setStatus(AVAILABLE)
+activate Machine
+WO -> Operator: setStatus(AVAILABLE)
+activate Operator
+WO -> WO: setCompletedAt(now)
+deactivate Operator
+deactivate Machine
+deactivate WO
+PT --> PM: Production Complete
+destroy PT
+
+@enduml

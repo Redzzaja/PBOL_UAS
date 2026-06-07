@@ -1,0 +1,61 @@
+@startuml
+skinparam backgroundColor #FEFEFE
+skinparam handwritten false
+
+title Use Case Diagram - Smart Manufacturing Work Order Management System
+
+left to right direction
+
+skinparam usecase {
+    BackgroundColor #E3F2FD
+    BorderColor #1976D2
+    ArrowColor #1976D2
+}
+
+skinparam actor {
+    BackgroundColor #FFF3E0
+    BorderColor #F57C00
+}
+
+skinparam rectangle {
+    BackgroundColor #F5F5F5
+    BorderColor #616161
+}
+
+actor "Production Manager" as Manager
+actor "Operator" as Operator
+
+rectangle "Smart Manufacturing Work Order Management System" {
+    usecase "Login System" as UC1
+    usecase "Create Work Order" as UC2
+    usecase "Assign Work Order" as UC3
+    usecase "View Work Order Status" as UC4
+    usecase "Monitor Production" as UC5
+    usecase "Generate Reports" as UC6
+    usecase "Execute Work Order" as UC7
+    usecase "Update Work Order Status" as UC8
+    usecase "View Assigned Tasks" as UC9
+    usecase "Manage Machines" as UC10
+    usecase "Manage Operators" as UC11
+    
+    UC2 ..> UC1 : <<include>>
+    UC3 ..> UC2 : <<extend>>
+    UC7 ..> UC9 : <<include>>
+    UC8 ..> UC7 : <<extend>>
+}
+
+Manager --> UC1
+Manager --> UC2
+Manager --> UC3
+Manager --> UC4
+Manager --> UC5
+Manager --> UC6
+Manager --> UC10
+Manager --> UC11
+
+Operator --> UC1
+Operator --> UC7
+Operator --> UC8
+Operator --> UC9
+
+@enduml
