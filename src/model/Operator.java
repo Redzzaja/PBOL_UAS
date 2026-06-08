@@ -46,7 +46,7 @@ public class Operator {
         this.loginTime = LocalDateTime.now();
     }
     
-    private synchronized String generateOperatorId() {
+    private static synchronized String generateOperatorId() {
         return "OPR-" + (++operatorCounter);
     }
     
@@ -76,8 +76,9 @@ public class Operator {
     
     /**
      * Menambahkan sertifikasi
+     * Bagian E - Sinkronisasi
      */
-    public void addCertification(String certification) {
+    public synchronized void addCertification(String certification) {
         this.certifications.add(certification);
         System.out.println("[Operator] Added certification '" + certification + "' to " + name);
     }
@@ -91,8 +92,9 @@ public class Operator {
     
     /**
      * Operator login ke sistem
+     * Bagian E - Sinkronisasi
      */
-    public void login() {
+    public synchronized void login() {
         this.loginTime = LocalDateTime.now();
         this.status = OperatorStatus.AVAILABLE;
         System.out.println("[Operator] " + name + " logged in at " + loginTime);
@@ -100,8 +102,9 @@ public class Operator {
     
     /**
      * Operator logout dari sistem
+     * Bagian E - Sinkronisasi
      */
-    public void logout() {
+    public synchronized void logout() {
         this.status = OperatorStatus.OFFLINE;
         System.out.println("[Operator] " + name + " logged out");
     }

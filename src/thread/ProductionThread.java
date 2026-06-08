@@ -93,36 +93,31 @@ public class ProductionThread extends Thread {
         
         while (workOrder.getCompletedQuantity() < targetQuantity && isRunning && !Thread.currentThread().isInterrupted()) {
             
-            // Check if paused
-            while (isPaused) {
-                Thread.sleep(100);
+            // Check if paused - use wait/notify for proper inter-thread communication
+            synchronized (workOrder) {
+                while (isPaused) {
+                    workOrder.wait();  // Release workOrder lock and wait for resume
+                }
             }
             
-            // Synchronized access ke work order dan machine
-            synchronized (workOrder) {
-                Machine machine = workOrder.getAssignedMachine();
+            Machine machine = workOrder.getAssignedMachine();
+            
+            if (machine != null) {
+                // Calculate production batch
+                int remaining = targetQuantity - workOrder.getCompletedQuantity();
+                int produce = Math.min(batchSize, remaining);
                 
-                if (machine != null) {
-                    synchronized (machine) {
-                        // Simulate production batch
-                        int remaining = targetQuantity - workOrder.getCompletedQuantity();
-                        int produce = Math.min(batchSize, remaining);
-                        
-                        // Simulate time based on machine capacity
-                        int sleepTime = calculateProductionTime(machine.getCapacityPerHour(), produce);
-                        
-                        // Release lock during sleep
-                        workOrder.wait(sleepTime);
-                        
-                        // Update completed quantity
-                        workOrder.updateCompletedQuantity(produce);
-                        
-                        // Print progress
-                        printProgress();
-                    }
-                } else {
-                    throw new IllegalStateException("Machine not assigned to work order");
+                // Simulate time based on machine capacity - SLEEP OUTSIDE LOCKS
+                int sleepTime = calculateProductionTime(machine.getCapacityPerHour(), produce);
+                Thread.sleep(sleepTime);
+                
+                // Update state inside synchronized blocks
+                synchronized (workOrder) {
+                    workOrder.updateCompletedQuantity(produce);
+                    printProgress();
                 }
+            } else {
+                throw new IllegalStateException("Machine not assigned to work order");
             }
             
             // Small delay untuk prevent CPU overuse
@@ -136,28 +131,44 @@ public class ProductionThread extends Thread {
     private int calculateProductionTime(double capacityPerHour, int quantity) {
         // Convert capacity per hour to milliseconds per item
         double msPerItem = (3600.0 * 1000.0) / capacityPerHour;
-        return (int)(msPerItem * quantity / 100); // Divided by 100 for simulation speed
+        return (int)(msPerItem * quantity / 250); // Divided by 250 for faster simulation speed
     }
     
+    // Shared lock for progress printing to prevent interleaving
+    private static final Object PROGRESS_LOCK = new Object();
+    private long lastPrintTime = 0;
+    private static final long PRINT_INTERVAL_MS = 600;
+
     /**
-     * Print production progress
+     * Print production progress dengan alignment rapi dan rate limiting
+     * Opsi 4: Alignment & formatting rapi seperti tabel
      */
     private void printProgress() {
         int completed = workOrder.getCompletedQuantity();
         int total = workOrder.getQuantity();
         double percentage = workOrder.getProgressPercentage();
-        
+
+        // Rate limiting: max 1 print per 600ms per thread
+        long now = System.currentTimeMillis();
+        if (now - lastPrintTime < PRINT_INTERVAL_MS) {
+            return;
+        }
+        lastPrintTime = now;
+
+        // Build progress bar (20 chars)
         StringBuilder progressBar = new StringBuilder("[");
         int filled = (int)(percentage / 5);
         for (int i = 0; i < 20; i++) {
             progressBar.append(i < filled ? "█" : "░");
         }
         progressBar.append("]");
-        
-        System.out.printf("[Production] %s | %s | %d/%d (%.1f%%)%n",
-            workOrder.getWorkOrderId(),
-            progressBar.toString(),
-            completed, total, percentage);
+
+        synchronized (PROGRESS_LOCK) {
+            System.out.printf("[Production] %-10s | %-22s | %3d/%-3d | %5.1f%%%n",
+                workOrder.getWorkOrderId(),
+                progressBar.toString(),
+                completed, total, percentage);
+        }
     }
     
     /**

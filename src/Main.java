@@ -9,31 +9,19 @@ import model.WorkOrderStatus;
 
 import java.util.List;
 
-/**
- * Main Class - Smart Manufacturing Work Order Management System
- * 
- * Bagian A - OOAD: Diagram tersedia di folder src/diagram/
- * Bagian B - OOP: Implementasi class Machine, Operator, WorkOrder, ProductionManager, ProductionThread
- * Bagian C - Exception Handling: Custom exceptions MachineUnavailableException, InvalidQuantityException, DuplicateWorkOrderException
- * Bagian D - Multithreading: Setiap Work Order berjalan di thread terpisah
- * Bagian E - Sinkronisasi: Menggunakan synchronized dan ReentrantLock untuk mencegah konflik
- */
 public class Main {
     
     public static void main(String[] args) {
-        System.out.println("╔══════════════════════════════════════════════════════════════════╗");
-        System.out.println("║   SMART MANUFACTURING WORK ORDER MANAGEMENT SYSTEM              ║");
-        System.out.println("║   PBOL - Ujian Akhir Semester                                   ║");
-        System.out.println("╚══════════════════════════════════════════════════════════════════╝");
+        System.out.println("╔══════════════════════════════════════════════════════════════╗");
+        System.out.println("║       SMART MANUFACTURING WORK ORDER MANAGEMENT SYSTEM       ║");
+        System.out.println("╚══════════════════════════════════════════════════════════════╝");
         System.out.println();
         
         // Get singleton instance
         ProductionManager manager = ProductionManager.getInstance();
         
         try {
-            // ==========================================
             // Setup Sistem
-            // ==========================================
             System.out.println("═══════════════════════════════════════════════════════════════");
             System.out.println("  PHASE 1: SYSTEM INITIALIZATION");
             System.out.println("═══════════════════════════════════════════════════════════════\n");
@@ -153,10 +141,11 @@ public class Main {
             System.out.println("\n[MONITOR] Watching production progress...");
             
             int checkCount = 0;
-            while (manager.getActiveThreads().size() > 0 && checkCount < 20) {
-                Thread.sleep(2000);
+            while (manager.getActiveThreads().size() > 0) {
+                Thread.sleep(10000);
+                checkCount++;
                 
-                System.out.println("\n--- Status Check " + (checkCount + 1) + " ---");
+                System.out.println("\n--- Status Check " + checkCount + " ---");
                 List<WorkOrder> activeOrders = manager.getActiveWorkOrders();
                 if (activeOrders.isEmpty()) {
                     System.out.println("  No active production");
@@ -168,14 +157,6 @@ public class Main {
                             wo.getProgressPercentage());
                     }
                 }
-                
-                checkCount++;
-            }
-            
-            // Wait for all threads to complete
-            System.out.println("\n[WAIT] Waiting for all production threads to complete...");
-            while (manager.getActiveThreads().size() > 0) {
-                Thread.sleep(1000);
             }
             
             // ==========================================
@@ -197,20 +178,6 @@ public class Main {
                 System.out.println("  Machine: " + (wo.getAssignedMachine() != null ? wo.getAssignedMachine().getName() : "N/A"));
                 System.out.println("  Operator: " + (wo.getAssignedOperator() != null ? wo.getAssignedOperator().getName() : "N/A"));
             }
-            
-            // ==========================================
-            // Summary
-            // ==========================================
-            System.out.println("\n═══════════════════════════════════════════════════════════════");
-            System.out.println("  SUMMARY");
-            System.out.println("═══════════════════════════════════════════════════════════════");
-            System.out.println("  ✓ OOAD Diagrams created (src/diagram/)");
-            System.out.println("  ✓ OOP Classes implemented (Machine, Operator, WorkOrder)");
-            System.out.println("  ✓ Exception Handling implemented (3 custom exceptions)");
-            System.out.println("  ✓ Multithreading implemented (parallel production)");
-            System.out.println("  ✓ Thread Synchronization implemented (prevent conflicts)");
-            System.out.println("═══════════════════════════════════════════════════════════════");
-            
         } catch (Exception e) {
             System.err.println("[ERROR] Unexpected error: " + e.getMessage());
             e.printStackTrace();

@@ -22,8 +22,8 @@ title Sequence Diagram - Create and Execute Work Order
 
 Manager -> PM: createWorkOrder(product, qty, priority)
 activate PM
-PM -> PM: validateInput()
-PM -> WO: new WorkOrder(id, product, qty, priority)
+    PM -> PM: // validate quantity
+    PM -> WO: new WorkOrder(id, product, qty, priority)
 activate WO
 WO --> PM: workOrder
 PM -> PM: addWorkOrder(workOrder)
@@ -63,20 +63,29 @@ PT -> PT: start()
 PT -> WO: getAssignedMachine()
 activate WO
 WO --> PT: machine
-PM -> PM: activeThreads.put(woId, thread)
-PT --> PM: thread started
-deactivate WO
-deactivate PT
-PM --> Manager: Production Started
-deactivate PM
+    PT --> PM: thread started
+    deactivate PT
+    PM --> Manager: Production Started
+    deactivate PM
+    
+    |||
+    note right of PT
+      ProductionThread runs independently
+      with Thread.sleep(speed) untuk simulasi waktu produksi
+      dan synchronized access ke WorkOrder untuk update progress
+    end note
 
 loop Production Simulation
-    PT -> PT: simulateProduction()
-    activate PT
-    PT -> WO: updateCompletedQuantity(n)
+    PT -> PT: // check if paused (wait/notify)
+    PT -> PT: getAssignedMachine()
+    PT -> PT: calculateProductionTime(capacity, batchSize)
+    PT -> PT: Thread.sleep(speed) // diluar synchronized block
+    
+    PT -> WO: synchronized(workOrder) updateCompletedQuantity(n)
+    activate WO
     PT -> WO: getProgressPercentage()
-    PT -> PT: Thread.sleep(speed)
-    deactivate PT
+    PT -> PT: printProgress()
+    deactivate WO
 end
 
 PT -> WO: setStatus(COMPLETED)

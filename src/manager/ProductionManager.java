@@ -188,9 +188,9 @@ public class ProductionManager {
      * Membuat work order baru dengan exception handling
      * Bagian C - Exception Handling
      */
-    public synchronized WorkOrder createWorkOrder(String productName, int quantity, int priority) 
+    public WorkOrder createWorkOrder(String productName, int quantity, int priority)
             throws InvalidQuantityException, DuplicateWorkOrderException {
-        
+
         // Validasi quantity
         if (quantity <= 0) {
             throw new InvalidQuantityException(quantity, "Quantity must be greater than 0");
@@ -198,23 +198,23 @@ public class ProductionManager {
         if (quantity > 10000) {
             throw new InvalidQuantityException(quantity, 10000);
         }
-        
-        // Cek duplikasi
+
         workOrderLock.lock();
         try {
+            // Cek duplikasi
             for (WorkOrder wo : workOrders) {
-                if (wo.getProductName().equalsIgnoreCase(productName) && 
+                if (wo.getProductName().equalsIgnoreCase(productName) &&
                     wo.getStatus() == WorkOrderStatus.PENDING) {
                     throw new DuplicateWorkOrderException(
                         "PENDING", wo.getWorkOrderId(), productName);
                 }
             }
-            
+
             WorkOrder workOrder = new WorkOrder(productName, quantity, priority);
             workOrders.add(workOrder);
             System.out.println("[ProductionManager] Work Order created: " + workOrder.getWorkOrderId());
             return workOrder;
-            
+
         } finally {
             workOrderLock.unlock();
         }
@@ -405,34 +405,50 @@ public class ProductionManager {
     
     /**
      * Get system status summary
+     * Bagian E - Sinkronisasi: acquire all locks before reading
      */
     public void printSystemStatus() {
-        System.out.println("\n========================================");
-        System.out.println("      SYSTEM STATUS REPORT");
-        System.out.println("========================================");
-        
-        System.out.println("\n--- Machines (" + machines.size() + ") ---");
-        for (Machine m : machines) {
-            System.out.println("  " + m);
+        workOrderLock.lock();
+        try {
+            machineLock.lock();
+            try {
+                operatorLock.lock();
+                try {
+                    System.out.println("\n========================================");
+                    System.out.println("      SYSTEM STATUS REPORT");
+                    System.out.println("========================================");
+
+                    System.out.println("\n--- Machines (" + machines.size() + ") ---");
+                    for (Machine m : machines) {
+                        System.out.println("  " + m);
+                    }
+
+                    System.out.println("\n--- Operators (" + operators.size() + ") ---");
+                    for (Operator o : operators) {
+                        System.out.println("  " + o);
+                    }
+
+                    System.out.println("\n--- Work Orders (" + workOrders.size() + ") ---");
+                    for (WorkOrder wo : workOrders) {
+                        System.out.println("  " + wo.getWorkOrderId() + " | " + wo.getProductName() +
+                            " | " + wo.getStatus() + " | " + String.format("%.1f%%", wo.getProgressPercentage()));
+                    }
+
+                    System.out.println("\n--- Active Productions (" + activeThreads.size() + ") ---");
+                    for (String woId : activeThreads.keySet()) {
+                        System.out.println("  " + woId + " [RUNNING]");
+                    }
+
+                    System.out.println("========================================\n");
+                } finally {
+                    operatorLock.unlock();
+                }
+            } finally {
+                machineLock.unlock();
+            }
+        } finally {
+            workOrderLock.unlock();
         }
-        
-        System.out.println("\n--- Operators (" + operators.size() + ") ---");
-        for (Operator o : operators) {
-            System.out.println("  " + o);
-        }
-        
-        System.out.println("\n--- Work Orders (" + workOrders.size() + ") ---");
-        for (WorkOrder wo : workOrders) {
-            System.out.println("  " + wo.getWorkOrderId() + " | " + wo.getProductName() + 
-                " | " + wo.getStatus() + " | " + String.format("%.1f%%", wo.getProgressPercentage()));
-        }
-        
-        System.out.println("\n--- Active Productions (" + activeThreads.size() + ") ---");
-        for (String woId : activeThreads.keySet()) {
-            System.out.println("  " + woId + " [RUNNING]");
-        }
-        
-        System.out.println("========================================\n");
     }
     
     /**

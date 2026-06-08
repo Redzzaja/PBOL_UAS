@@ -46,13 +46,21 @@ class Machine {
     - String location
     - LocalDateTime lastMaintenance
     - LocalDateTime nextMaintenance
+    - {static} int machineCounter
+    + Machine(String, String, double, String)
     + Machine(String, String, String, double, String)
     + getMachineId(): String
     + getName(): String
+    + getType(): String
     + getStatus(): MachineStatus
+    + getCapacityPerHour(): double
+    + getLocation(): String
+    + getLastMaintenance(): LocalDateTime
+    + getNextMaintenance(): LocalDateTime
     + setStatus(MachineStatus): void
     + isAvailable(): boolean
     + performMaintenance(): void
+    + completeMaintenance(): void
     + toString(): String
 }
 
@@ -64,13 +72,23 @@ class Operator {
     - String shift
     - List<String> certifications
     - LocalDateTime loginTime
+    - {static} int operatorCounter
+    + Operator(String, String, String)
     + Operator(String, String, String, String)
     + getOperatorId(): String
     + getName(): String
+    + getSkillLevel(): String
     + getStatus(): OperatorStatus
+    + getShift(): String
+    + getCertifications(): List<String>
+    + getLoginTime(): LocalDateTime
+    + setSkillLevel(String): void
+    + setShift(String): void
     + setStatus(OperatorStatus): void
     + addCertification(String): void
     + isAvailable(): boolean
+    + login(): void
+    + logout(): void
     + toString(): String
 }
 
@@ -87,65 +105,109 @@ class WorkOrder {
     - LocalDateTime completedAt
     - int priority
     - String notes
+    - {static} int workOrderCounter
+    + WorkOrder(String, int, int)
     + WorkOrder(String, String, int, int)
     + getWorkOrderId(): String
+    + getProductName(): String
+    + getQuantity(): int
+    + getCompletedQuantity(): int
     + getStatus(): WorkOrderStatus
-    + setStatus(WorkOrderStatus): void
     + getAssignedMachine(): Machine
-    + setAssignedMachine(Machine): void
     + getAssignedOperator(): Operator
+    + getCreatedAt(): LocalDateTime
+    + getStartedAt(): LocalDateTime
+    + getCompletedAt(): LocalDateTime
+    + getPriority(): int
+    + getNotes(): String
+    + getEstimatedCompletionTime(): String
+    + getProductionDuration(): String
+    + setStatus(WorkOrderStatus): void
+    + setAssignedMachine(Machine): void
     + setAssignedOperator(Operator): void
+    + setCompletedAt(LocalDateTime): void
+    + setNotes(String): void
     + updateCompletedQuantity(int): void
     + getProgressPercentage(): double
     + toString(): String
 }
 
 class ProductionManager {
-    - static ProductionManager instance
+    - {static} volatile ProductionManager instance
+    - {static} Object lock
     - List<Machine> machines
     - List<Operator> operators
     - List<WorkOrder> workOrders
     - Map<String, ProductionThread> activeThreads
     - ReentrantLock machineLock
+    - ReentrantLock operatorLock
+    - ReentrantLock workOrderLock
     - ProductionManager()
-    + static synchronized getInstance(): ProductionManager
+    + {static} getInstance(): ProductionManager
     + addMachine(Machine): void
+    + findMachine(String): Machine
+    + getAvailableMachines(): List<Machine>
+    + getAllMachines(): List<Machine>
     + addOperator(Operator): void
-    + createWorkOrder(String, String, int, int): WorkOrder
+    + findOperator(String): Operator
+    + getAvailableOperators(): List<Operator>
+    + getAllOperators(): List<Operator>
+    + createWorkOrder(String, int, int): WorkOrder
+    + findWorkOrder(String): WorkOrder
     + assignWorkOrder(String, String, String): void
     + startProduction(String): void
-    + getMachineStatus(): List<Machine>
-    + getOperatorStatus(): List<Operator>
-    + getWorkOrderStatus(): List<WorkOrder>
+    + stopProduction(String): void
     + cancelWorkOrder(String): void
+    + onProductionComplete(String): void
+    + getAllWorkOrders(): List<WorkOrder>
+    + getWorkOrdersByStatus(WorkOrderStatus): List<WorkOrder>
+    + getActiveWorkOrders(): List<WorkOrder>
+    + getActiveThreads(): Map<String, ProductionThread>
+    + printSystemStatus(): void
+    + {static} resetInstance(): void
 }
 
 class ProductionThread {
     - WorkOrder workOrder
+    - ProductionManager manager
+    - volatile boolean isRunning
+    - volatile boolean isPaused
     - int productionSpeed
-    - boolean isRunning
-    - Thread thread
-    + ProductionThread(WorkOrder, int)
+    + ProductionThread(WorkOrder, ProductionManager)
     + run(): void
-    + startProduction(): void
-    + stopProduction(): void
     + isRunning(): boolean
-    + simulateProduction(): void
+    + pauseProduction(): void
+    + resumeProduction(): void
+    + stopProduction(): void
+    + getWorkOrder(): WorkOrder
+    + setProductionSpeed(int): void
+    - simulateProduction(): void
+    - calculateProductionTime(double, int): int
+    - printProgress(): void
+    - completeProduction(): void
+    - handleProductionInterrupted(): void
+    - handleProductionError(Exception): void
+    - calculateThreadPriority(int): int
 }
 
 class MachineUnavailableException {
     + MachineUnavailableException(String)
     + MachineUnavailableException(String, Throwable)
+    + MachineUnavailableException(String, String, String)
 }
 
 class InvalidQuantityException {
     + InvalidQuantityException(String)
     + InvalidQuantityException(String, Throwable)
+    + InvalidQuantityException(int, String)
+    + InvalidQuantityException(int, int)
 }
 
 class DuplicateWorkOrderException {
     + DuplicateWorkOrderException(String)
     + DuplicateWorkOrderException(String, Throwable)
+    + DuplicateWorkOrderException(String, String)
+    + DuplicateWorkOrderException(String, String, String)
 }
 
 Machine "1" -- "0..*" WorkOrder : assigned to >
