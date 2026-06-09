@@ -1,0 +1,35 @@
+@startuml
+!theme plain
+
+title AD06 - Generate Reports
+
+|User|
+start
+:Select "Generate Reports";
+:Select Report Type
+(Production Summary / Machine Utilization / Operator Performance);
+:Set Date Range / Filter;
+:Click Generate;
+
+|System|
+:Validate Filter;
+if (Valid Filter?) then (yes)
+  :Fetch Production Data;
+  :Aggregate and Process Data;
+  :Generate Report Object;
+  if (Export Format == PDF?) then (yes)
+    :Export to PDF;
+  elseif (Export Format == CSV?) then (yes)
+    :Export to CSV;
+  else (Preview)
+    :Show Preview;
+  endif
+  :Save / Download Report;
+else (no)
+  :Show Validation Error;
+endif
+
+|User|
+stop
+
+@enduml

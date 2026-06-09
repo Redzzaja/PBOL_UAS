@@ -1,0 +1,34 @@
+@startuml
+!theme plain
+
+title AD04 - View Work Order Status
+
+|User|
+start
+:Select "View Work Order Status";
+if (Apply Filter?) then (yes)
+  :Select Status Filter
+  (PENDING / IN_PROGRESS / COMPLETED);
+else (no)
+endif
+
+|System|
+:Fetch Work Orders from Database;
+if (Filter Applied?) then (yes)
+  :Filter by Selected Status;
+else (no)
+endif
+:Display Work Order List;
+
+|User|
+if (Select Specific WO?) then (yes)
+  |System|
+  :Fetch WO Details;
+  :Display Detail Card;
+else (no)
+endif
+
+|User|
+stop
+
+@enduml

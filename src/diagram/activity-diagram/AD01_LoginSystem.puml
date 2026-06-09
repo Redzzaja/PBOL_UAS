@@ -1,0 +1,28 @@
+@startuml
+!theme plain
+
+title AD01 - Login System
+
+|User|
+start
+:Enter Username and Password;
+:Submit Login;
+
+|System|
+:Validate Credentials;
+if (Valid?) then (yes)
+  :Load User Profile;
+  :Grant Access;
+  if (Role == Operator?) then (yes)
+    :Set Operator Status to AVAILABLE;
+  else (no)
+  endif
+  :Redirect to Dashboard;
+else (no)
+  :Display Error Message;
+endif
+
+|User|
+stop
+
+@enduml

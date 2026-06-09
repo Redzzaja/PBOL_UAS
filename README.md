@@ -1,7 +1,5 @@
 # Smart Manufacturing Work Order Management System
 
-## PBOL - Ujian Akhir Semester
-
 Sistem manajemen work order untuk perusahaan manufaktur dengan fitur multithreading dan sinkronisasi.
 
 ## Bagian A - Object Oriented Analysis and Design (OOAD)
@@ -236,34 +234,3 @@ Program akan menampilkan:
 2. **Phase 2**: Exception Handling Demo - Demonstrate custom exceptions
 3. **Phase 3**: Multithreading Demo - Parallel production with progress tracking
 4. **Phase 4**: Final Status - Complete system report
-
-## Struktur Project
-
-```
-PBOL_UAS/
-├── src/
-│   ├── Main.java                           # Main class
-│   ├── model/
-│   │   ├── Machine.java                    # Machine model class
-│   │   ├── Operator.java                   # Operator model class
-│   │   ├── WorkOrder.java                  # WorkOrder model class
-│   │   ├── MachineStatus.java              # Machine status enum
-│   │   ├── OperatorStatus.java             # Operator status enum
-│   │   └── WorkOrderStatus.java            # WorkOrder status enum
-│   ├── exception/
-│   │   ├── MachineUnavailableException.java
-│   │   ├── InvalidQuantityException.java
-│   │   └── DuplicateWorkOrderException.java
-│   ├── manager/
-│   │   └── ProductionManager.java            # Singleton manager
-│   ├── thread/
-│   │   └── ProductionThread.java           # Production thread
-│   └── diagram/
-│       ├── UseCaseDiagram.puml
-│       ├── ClassDiagram.puml
-│       ├── SequenceDiagram.puml
-│       └── ActivityDiagram.puml
-├── docs/
-│   └── README.md                           # Dokumentasi
-└── out/                                    # Compiled classes
-```

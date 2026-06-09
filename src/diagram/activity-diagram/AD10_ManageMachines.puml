@@ -1,0 +1,49 @@
+@startuml
+!theme plain
+
+title AD10 - Manage Machines
+
+|User|
+start
+:Select "Manage Machines";
+
+|System|
+:Display Machine List;
+
+|User|
+if (Action == Add?) then (yes)
+  :Input Machine Details
+  (name, type, capacity, location);
+  :Submit;
+  |System|
+  :Validate Input;
+  if (Valid?) then (yes)
+    :Insert to Database;
+    :Show Success;
+  else (no)
+    :Show Validation Error;
+  endif
+elseif (Action == Edit?) then (yes)
+  :Select Machine;
+  :Edit Details;
+  :Submit;
+  |System|
+  :Update Database;
+  :Show Success;
+elseif (Action == Delete?) then (yes)
+  :Select Machine;
+  :Confirm Delete;
+  |System|
+  if (Confirmed?) then (yes)
+    :Delete from Database;
+    :Show Success;
+  else (no)
+    :Cancel;
+  endif
+else (no)
+endif
+
+|User|
+stop
+
+@enduml

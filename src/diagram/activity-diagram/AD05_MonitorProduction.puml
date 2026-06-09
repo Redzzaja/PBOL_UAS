@@ -1,0 +1,30 @@
+@startuml
+!theme plain
+
+title AD05 - Monitor Production
+
+|User|
+start
+:Select "Monitor Production";
+
+|System|
+:Fetch Active Work Orders (IN_PROGRESS);
+:Fetch Active Production Threads;
+while (Monitoring Active?) is (yes)
+  :Calculate Progress Percentage for Each WO;
+  :Render Real-time Dashboard;
+  if (Auto-refresh Enabled?) then (yes)
+    :Sleep Interval;
+  else (no)
+    |User|
+    :Manual Refresh;
+    |System|
+  endif
+  :Check Continue Monitoring;
+endwhile (no)
+:Close Monitoring Session;
+
+|User|
+stop
+
+@enduml

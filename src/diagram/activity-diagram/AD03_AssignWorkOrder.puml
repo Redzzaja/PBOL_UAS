@@ -1,0 +1,51 @@
+@startuml
+!theme plain
+
+title AD03 - Assign Work Order
+
+|User|
+start
+:Select "Assign Work Order";
+:Select Work Order (PENDING);
+
+|System|
+:Load Work Order Details;
+:List Available Machines;
+
+|User|
+:Select Machine;
+
+|System|
+if (Machine.isAvailable()?) then (yes)
+  :Lock Machine (BUSY);
+  :List Available Operators;
+  
+  |User|
+  :Select Operator;
+  
+  |System|
+  if (Operator.isAvailable()?) then (yes)
+    :Lock Operator (BUSY);
+    :Assign Machine to WorkOrder;
+    :Assign Operator to WorkOrder;
+    :Update WorkOrder Status to PENDING;
+    :Display Assignment Success;
+  else (no)
+    :Throw MachineUnavailableException;
+    :Release Machine Lock;
+    |User|
+    :Show Operator Unavailable Error;
+    stop
+  endif
+else (no)
+  |System|
+  :Throw MachineUnavailableException;
+  |User|
+  :Show Machine Unavailable Error;
+  stop
+endif
+
+|User|
+stop
+
+@enduml

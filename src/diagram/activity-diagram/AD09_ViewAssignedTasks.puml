@@ -1,0 +1,34 @@
+@startuml
+!theme plain
+
+title AD09 - View Assigned Tasks
+
+|User|
+start
+:Login as Operator;
+:Select "View Assigned Tasks";
+
+|System|
+:Fetch WO by assignedOperatorId;
+
+|User|
+if (Filter by Status?) then (yes)
+  :Select Status Filter
+  (PENDING / IN_PROGRESS);
+else (no)
+endif
+
+|System|
+:Display Assigned Tasks List;
+
+|User|
+if (Select Specific WO?) then (yes)
+  |System|
+  :Show WO Detail;
+else (no)
+endif
+
+|User|
+stop
+
+@enduml

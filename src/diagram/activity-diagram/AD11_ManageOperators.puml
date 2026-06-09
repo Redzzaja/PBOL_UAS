@@ -1,0 +1,49 @@
+@startuml
+!theme plain
+
+title AD11 - Manage Operators
+
+|User|
+start
+:Select "Manage Operators";
+
+|System|
+:Display Operator List;
+
+|User|
+if (Action == Add?) then (yes)
+  :Input Operator Details
+  (name, skillLevel, shift, certifications);
+  :Submit;
+  |System|
+  :Validate Input;
+  if (Valid?) then (yes)
+    :Insert to Database;
+    :Show Success;
+  else (no)
+    :Show Validation Error;
+  endif
+elseif (Action == Edit?) then (yes)
+  :Select Operator;
+  :Edit Details;
+  :Submit;
+  |System|
+  :Update Database;
+  :Show Success;
+elseif (Action == Delete?) then (yes)
+  :Select Operator;
+  :Confirm Delete;
+  |System|
+  if (Confirmed?) then (yes)
+    :Delete from Database;
+    :Show Success;
+  else (no)
+    :Cancel;
+  endif
+else (no)
+endif
+
+|User|
+stop
+
+@enduml

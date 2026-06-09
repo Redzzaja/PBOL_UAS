@@ -1,0 +1,40 @@
+@startuml
+!theme plain
+
+title AD02 - Create Work Order
+
+|User|
+start
+:Select "Create Work Order";
+:Input Product Name;
+:Input Quantity;
+:Input Priority;
+:Submit;
+
+|System|
+:Validate Input;
+if (Quantity > 0 and Quantity <= 10000?) then (yes)
+  :Check for Duplicate PENDING Work Order;
+  if (Duplicate Found?) then (yes)
+    :Throw DuplicateWorkOrderException;
+    |User|
+    :Show Duplicate Error;
+    stop
+  else (no)
+    |System|
+    :Create WorkOrder Object;
+    :Set Status to PENDING;
+    :Save to Database;
+    :Display Success Message;
+  endif
+else (no)
+  :Throw InvalidQuantityException;
+  |User|
+  :Show Validation Error;
+  stop
+endif
+
+|User|
+stop
+
+@enduml

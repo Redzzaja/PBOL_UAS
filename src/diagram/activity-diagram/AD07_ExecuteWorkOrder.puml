@@ -1,0 +1,48 @@
+@startuml
+!theme plain
+
+title AD07 - Execute Work Order
+
+|User|
+start
+:Login as Operator;
+:Select My Tasks Execute WO;
+:Select Assigned WO PENDING;
+:Click Start Production;
+
+|System|
+:Validate Resources;
+if (Ready) then (yes)
+  :Create ProductionThread;
+  :Set Status IN_PROGRESS;
+  :Start Thread;
+  while (Not Complete) is (yes)
+    :Check Paused;
+    :Calc Production Time;
+    :Sleep Speed;
+    :Update Completed Qty;
+    :Calc Progress Pct;
+    :Print Progress;
+    if (Pause Req) then (yes)
+      :Pause Thread;
+      |User|
+      :Click Resume;
+      |System|
+    endif
+    if (Stop Req) then (yes)
+      :Set Stop Flag;
+    endif
+  endwhile (no)
+  :Set Status COMPLETED;
+  :Set Machine AVAILABLE;
+  :Set Operator AVAILABLE;
+  :Set completedAt;
+  :Show Complete;
+else (no)
+  :Show Not Ready;
+endif
+
+|User|
+stop
+
+@enduml
