@@ -47,7 +47,7 @@ public class Machine {
         this.nextMaintenance = LocalDateTime.now().plusMonths(1);
     }
     
-    private synchronized String generateMachineId() {
+    private static synchronized String generateMachineId() {
         return "MCH-" + (++machineCounter);
     }
     
@@ -68,7 +68,7 @@ public class Machine {
     public synchronized void setStatus(MachineStatus status) {
         MachineStatus oldStatus = this.status;
         this.status = status;
-        System.out.println("[Machine] " + name + " (" + machineId + "): " + 
+        System.out.println("\n[Machine] " + name + " (" + machineId + "): " + 
                 oldStatus + " -> " + status);
     }
     
@@ -86,7 +86,7 @@ public class Machine {
         this.lastMaintenance = LocalDateTime.now();
         this.nextMaintenance = LocalDateTime.now().plusMonths(1);
         this.status = MachineStatus.MAINTENANCE;
-        System.out.println("[Machine] Maintenance performed on " + name);
+        System.out.println("\n[Machine] Maintenance performed on " + name);
     }
     
     /**
@@ -94,7 +94,7 @@ public class Machine {
      */
     public synchronized void completeMaintenance() {
         this.status = MachineStatus.AVAILABLE;
-        System.out.println("[Machine] Maintenance completed on " + name);
+        System.out.println("\n[Machine] Maintenance completed on " + name);
     }
     
     @Override

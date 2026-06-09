@@ -56,7 +56,7 @@ public class WorkOrder {
         this.notes = "";
     }
     
-    private synchronized String generateWorkOrderId() {
+    private static synchronized String generateWorkOrderId() {
         return "WO-" + String.format("%05d", ++workOrderCounter);
     }
     
@@ -72,7 +72,7 @@ public class WorkOrder {
     public synchronized LocalDateTime getStartedAt() { return startedAt; }
     public synchronized LocalDateTime getCompletedAt() { return completedAt; }
     public int getPriority() { return priority; }
-    public String getNotes() { return notes; }
+    public synchronized String getNotes() { return notes; }
     
     // Setters dengan sinkronisasi untuk thread safety
     public synchronized void setStatus(WorkOrderStatus status) {
@@ -86,7 +86,7 @@ public class WorkOrder {
             this.completedAt = LocalDateTime.now();
         }
         
-        System.out.println("[WorkOrder] " + workOrderId + " (" + productName + "): " + 
+        System.out.println("\n[WorkOrder] " + workOrderId + " (" + productName + "): " + 
                 oldStatus + " -> " + status);
     }
     
@@ -102,7 +102,7 @@ public class WorkOrder {
         this.completedAt = time;
     }
     
-    public void setNotes(String notes) { this.notes = notes; }
+    public synchronized void setNotes(String notes) { this.notes = notes; }
     
     /**
      * Update completed quantity dengan thread safety
@@ -125,8 +125,9 @@ public class WorkOrder {
     
     /**
      * Get estimated completion time
+     * Bagian E - Sinkronisasi
      */
-    public String getEstimatedCompletionTime() {
+    public synchronized String getEstimatedCompletionTime() {
         if (assignedMachine == null || startedAt == null) {
             return "N/A";
         }
@@ -155,7 +156,7 @@ public class WorkOrder {
     }
     
     @Override
-    public String toString() {
+    public synchronized String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append(String.format("WorkOrder[%s] %s (Qty: %d/%d, Priority: %d, Status: %s)",
                 workOrderId, productName, completedQuantity, quantity, priority, status));

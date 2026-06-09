@@ -1,0 +1,31 @@
+@startuml
+!theme plain
+
+title AD08 - Update Work Order Status
+
+|User|
+start
+:Select WO from Assigned Tasks;
+:Click Update Status;
+:Select New Status
+(COMPLETED / ON_HOLD / CANCELLED);
+:Confirm Update;
+
+|System|
+:Validate Status Transition;
+if (Valid Transition?) then (yes)
+  :Update WO Status in Database;
+  if (Status == COMPLETED or CANCELLED?) then (yes)
+    :Release Machine (AVAILABLE);
+    :Release Operator (AVAILABLE);
+  else (no)
+  endif
+  :Show Update Success;
+else (no)
+  :Show Invalid Transition Error;
+endif
+
+|User|
+stop
+
+@enduml
